@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.mychatappnetty.dao.PostImgDao">
+
+    <insert id="batchInsertPostImg" parameterType="java.util.List" useGeneratedKeys="false">
+        INSERT INTO
+            tb_post_img(id,post_id,post_img,img_size,img_position)
+        VALUES
+            <foreach collection="list" item="postImg" index="index"
+                     separator=",">
+                (
+                    #{postImg.id},
+                    #{postImg.postId},
+                    #{postImg.postImg},
+                    #{postImg.imgSize},
+                    #{postImg.imgPosition}
+                )
+            </foreach>
+    </insert>
+
+    <select id="queryPostImgListByPostId" resultType="com.example.mychatappnetty.entity.PostImg">
+        SELECT
+            id,
+            post_id,
+            post_img,
+            img_size,
+            img_position
+		FROM
+		    tb_post_img
+		WHERE
+		    post_id=#{postId}
+		ORDER BY
+		    img_position ASC
+    </select>
+
+
+    <delete id="deletePostImgByPostId" parameterType="String">
+        DELETE FROM
+            tb_post_img
+        WHERE
+            post_id = #{postId}
+    </delete>
+
+
+</mapper>

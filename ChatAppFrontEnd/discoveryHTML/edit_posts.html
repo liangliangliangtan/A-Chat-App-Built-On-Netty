@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en" class="feedback">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title>Edit An Post</title>
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" type="text/css" href="../css/posts/feedback.css" />
+		<link rel="stylesheet" href="../css/font/fontpage.css" / >
+	    <!-- Compiled and minified CSS -->
+	    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+	
+	</head>
+
+	<body>
+		
+		<header class="mui-bar mui-bar-nav bg-deepblue">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left" style="color: #FFFFFF;"></a>
+			<h1 class="mui-title" style="color: #FFFFFF;">Create Moment</h1>
+			<a class="mui-icon mui-icon-right-nav mui-pull-right" 
+		       id="submit"
+		       style="color: #FFFFFF; text-align: center; margin-top: 5px;font-size: 14px;">
+		       	POST
+		    </a>
+		</header>
+		
+		
+		
+		<div class="mui-content">
+			
+			<div class="mui-content-padded">
+				<div class="mui-inline">Post Content</div>
+			</div>
+			
+			<div class="row mui-input-row">
+				<textarea id='post_content' class="mui-input-clear question" placeholder="Say Something..."></textarea>
+			</div>
+			<p>
+				Picture(Optional, No larger then 20MB)
+			</p>
+			<div id='image-list' class="row image-list">
+			</div>
+		</div>
+		<script src="../js/mui.min.js"></script>
+		<script type="text/javascript" src="../js/commons/app.js" ></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.js"></script>
+		<script src="../js/feedback.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript">
+			mui.init();
+			mui('.mui-scroll-wrapper').scroll();
+		</script>
+	</body>
+
+</html>

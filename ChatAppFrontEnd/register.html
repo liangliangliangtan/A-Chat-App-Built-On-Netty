@@ -1,0 +1,238 @@
+<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<script src="js/mui.min.js"></script>
+
+		<link rel="stylesheet" type="text/css" href="css/registLogin/util.css">
+		<link rel="stylesheet" type="text/css" href="css/registLogin/main.css">
+		<link rel="stylesheet" href="css/mui.min.css" />
+
+		<script type="text/javascript" charset="utf-8">
+			mui.init();
+		</script>
+
+		<style>
+			
+			.p-t-85 {
+				padding-top: 10px;
+			}
+			
+			.p-b-70 {
+				padding-bottom: 35px;
+			}
+			
+			.m-t-85 {
+				margin-top: 15px;
+			}
+			
+			.container-login100 {
+				padding: 25px;
+			}
+			
+			/*toast notification*/
+			.mui-toast-container {
+				bottom: 50% !important;
+			}
+			.mui-toast-message {
+				opacity: 0.6;
+				color: #fff;
+				width: 180px;
+				padding: 70px 5px 10px 5px;
+			}
+			.reset-password{
+				float:left
+			}
+			.create-new-account{
+				float:right
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="mui-content">
+			<div class="container-login100">
+				<div class="wrap-login100 p-t-85 p-b-20">
+					
+					<form id="registerform">
+						<div class="wrap-input100 validate-input m-t-85 m-b-35">
+							<input class="input100" type="text" id="new_username" name="username" placeholder="Please Enter UserName">
+							<span class="focus-input100"></span>
+						</div>
+
+						<div class="wrap-input100 validate-input m-b-35">
+							<input class="input100" type="password" id="new_password" name="password" placeholder="Please Enter Password">
+							<span class="focus-input100"></span>
+						</div>
+						
+						<div class="wrap-input100 validate-input m-b-35">
+							<input class="input100" type="text" id="new_email" name="email" placeholder="Please Enter your Email">
+							<span class="focus-input100"></span>
+						</div>
+						
+						<div class="m-b-20 mui-row send-vcode-button">
+							<button type="button" 
+									data-loading-text="60"
+									data-loading-icon="mui-spinner mui-spinner-custom" 
+									class="mui-btn mui-btn-success mui-btn-outlined mui-col-xs-5">
+								Send Kaptcher 
+							</button>
+							<div class="mui-col-xs-7">
+							</div>
+						</div>
+						
+						<div class="wrap-input30 validate-input m-b-35">
+							<input class="input100" type="number" id="new_vcode" name="vcode" placeholder="Kaptcher">
+							<span class="focus-input100"></span>
+						</div>
+						
+						<div class="m-b-10 redirect-to-login">
+							<a href="#">Back to Sign In</button>
+						</div>
+						
+						<div class="container-login100-form-btn p-t-30">
+							<button type="submit" id="register" class="login100-form-btn">
+								Register
+							</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>	
+	</body>
+	
+	<script type="text/javascript" src="js/commons/app.js" ></script>
+	
+	
+	<script type="text/javascript">
+		
+		/*
+		 * Tab the button:
+		 * TODO: call the send vc code api 
+		 * start the timer for 60 seconds
+		 */
+		
+		mui.plusReady(function() {
+			mui('.send-vcode-button').on('tap', '.mui-btn', function(e) {
+			    mui(this).button('loading')
+			    console.log('wait here')		    
+			    let time = 60000;
+			    let x = null; 
+			    setTimeout(function() {
+			    	x = setInterval(function(){
+		                time= time - 1000; //reduce each second
+		                console.log(time)
+		                this.lastChild.innerText = (time/1000) % 60 // the last span element 		                //this.setAttribute('data-loading-text',""+(time/1000)%60)
+		                if(time == 0){
+		                    clearInterval(x);
+		                    mui(this).button('reset');
+		                }
+		       		}.bind(this), 1000);
+		       		//response.setHeader("Access-Control-Allow-Credentials", "true");
+		       		let userEmail = document.getElementById("new_email").value.trim();
+		       		mui.ajax(app.serverUrl + "/user/getVCode?userEmail=" + userEmail,{
+						dataType:'json',
+						type:'get',
+						timeout:10000,
+						headers:{'Content-Type':'application/json'},
+						xhrFields: {
+                			withCredentials: true
+            			},
+           				crossDomain: true,
+						success:function(data){
+							console.log(JSON.stringify(data));
+							if(data.status == 200){
+								app.showToast("Activation code has been sent to your email address~"
+								,"success");
+							}else{
+								app.showToast(data.msg, "error");
+								if(x != null) clearInterval(x);
+			                    mui(this).button('reset');
+							}
+						}.bind(this)
+					});
+	    		}.bind(this), 0);
+	    	})
+		})
+		
+		/*
+		 * When click the back button to the   
+		 */
+		mui.plusReady(function(){
+			mui('.redirect-to-login').on('tap','a',function(){
+		  		mui.openWindow("login.html", "login.html");
+			});
+		})
+	</script>
+	
+	
+	<script type="application/javascript">
+		/**
+		 * Click Register Button event.
+		 */
+		mui.plusReady(function(){
+			let registerDom = document.getElementById('registerform');
+			let VCode = document.getElementById('new_vcode');
+			let username = document.getElementById('new_username');
+			let txt_password = document.getElementById('new_password');
+			let email = document.getElementById('new_email');
+			registerform.addEventListener('submit',function(e){
+				e.preventDefault();
+				console.log(VCode.value)
+				if (!app.isNotNull(username.value)) {
+					// focus the empty username
+					username.focus();
+				} else if (!app.isNotNull(txt_password.value)) {
+					// focus on the password
+					txt_password.focus();
+				} else if(!app.isNotNull(VCode.value)){
+					VCode.focus();
+				} else {
+					// username and password cannot be too long
+					if (username.value.length > 12) {
+						app.showToast("Username cannot longer than 12 ", "error");
+						return false;
+					} else if (txt_password.value.length > 12) {
+						app.showToast("Password cannot longer than 12 ", "error");
+						return false;
+					}
+				}
+				console.log(VCode.value)
+				// Each client has a unique client id.(will be used later)
+				var clientId = plus.push.getClientInfo().clientid;
+				mui.ajax(app.serverUrl + "/user/register",{
+					data:{
+						username:username.value,
+						password:txt_password.value,
+						clientId: clientId,
+						userEmail: email.value,
+						vcode: VCode.value.toString()
+					},
+					dataType:'json',//Server return Json Type data
+					type:'post',//HTTP Request time 
+					timeout:10000,//Wait Time out 10 second；
+					headers:{'Content-Type':'application/json'},
+					xhrFields: {
+                			withCredentials: true
+            		},
+           			crossDomain: true,
+					success:function(data){					
+						console.log(JSON.stringify(data));
+						username.blur();
+						txt_password.blur();
+						email.blur();
+						
+						if (data.status == 200) {
+							// When register successfully , routing to login page 
+							mui.openWindow("login.html", "login.html");
+						} else {
+							// show error msg on Mobile
+							app.showToast(data.msg, "error");
+						}
+					}
+				});
+			})
+		})
+		
+	</script>
+</html>

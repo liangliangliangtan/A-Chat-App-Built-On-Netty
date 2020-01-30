@@ -1,0 +1,271 @@
+
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<link rel="stylesheet" type="text/css" href="../css/header.css" />
+		<link rel="stylesheet" type="text/css" href="../css/chat.css" />
+		<link rel="stylesheet" href="../css/font/fontpage.css" />
+		<style>
+			html,
+			body {
+				height: 100%;
+				margin: 0px;
+				padding: 0px;
+				overflow: hidden;
+				-webkit-touch-callout: none;
+				-webkit-user-select: none;
+			}
+		</style>
+	</head>
+
+	<body contextmenu="return false;">
+
+		<header class="mui-bar mui-bar-nav title bg-deepblue" style="position: fixed;">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left title-color"></a>
+			<h1 class="mui-title title-color"><b id="chatting-nickname">FreeChat</b></h1>
+		</header>
+
+		<div id="msg-outter" class="mui-content">
+			<div id='msg'>
+			</div>
+		</div>
+		
+		<footer>
+			<div class="footer-center">
+				<textarea id='msg-text' type="text" class='input-text'></textarea>
+			</div>
+			<label for="" class="footer-right">
+				<button type="button" class="mui-btn mui-btn-gray" id="send">发送</button>
+			</label>
+		</footer>
+		
+		<script src="../js/mui.min.js"></script>
+		<script type="application/javascript">
+			
+			// Using name space to prevent pollution.
+//			(function($,document){
+				
+				mui.init()
+				var friendUserId; 
+				var friendNickname;
+				var friendFaceImage;
+				
+				mui.plusReady(function(){
+					
+					
+					var chattingWebVeiw = plus.webview.currentWebview();
+					console.log(chattingWebVeiw.id);
+					
+					
+					var me = app.getUserGlobalInfo();
+					var myFaceImg = me.faceImage;
+					//get parameters from previous WebView
+					
+					friendUserId = chattingWebVeiw.friendUserId;
+					friendNickname = chattingWebVeiw.friendNickname;
+					friendFaceImage = chattingWebVeiw.friendFaceImage;
+					
+					if (friendFaceImage == null || friendFaceImage.length == 0){
+						friendFaceImage = "../css/registLogin/default_img.jpg"
+					}else{
+						friendFaceImage = app.imgServerUrl + chattingWebVeiw.friendFaceImage; 
+					}
+					
+					
+					if (myFaceImg == null || myFaceImg.length == 0){
+						myFaceImg = "../css/registLogin/default_img.jpg"
+					}else{
+						myFaceImg = app.imgServerUrl + myFaceImg; 
+					}
+					
+					// Set keyboard Style
+					chattingWebVeiw.setStyle({
+						softinputMode: "adjustResize"
+					});
+					
+				
+					// render friend nickname 
+					document.getElementById("chatting-nickname").innerHTML = friendNickname;
+					
+					// init chatting history.
+					initChatHistory();
+					
+					scroll2Buttom();
+					var text_msg = document.getElementById("msg-text");
+					var send_btn = document.getElementById("send");
+					
+					
+					
+					// when there is text, dynamically modify the button style
+					text_msg.addEventListener("input", function(){
+						var message = text_msg.value;
+						if (message.length > 0){
+							send_btn.setAttribute("class", "mui-btn-blue");
+						}else{
+							send_btn.setAttribute("class", "mui-btn-grey");
+						}
+					});
+					
+					
+					
+					send_btn.addEventListener("tap", function(){
+						var message = text_msg.value;
+						if(!checkNetWorkCondition()){
+							app.showToast("Network Error : please check your network connection","error");
+							return;
+						}
+						
+						if (message.length == 0){
+							return;
+						}
+						// TODO: connect to netty server, wrapper to DataContent Object
+						console.log("ajax : send message");
+						var chatMsg = new app.ChatMsg(me.id, friendUserId, message, null);
+						var dataContent = new app.DataContent(app.CHAT, chatMsg, null);
+						var websocketWebView = plus.webview.getWebviewById('chatlist.html');
+						websocketWebView.evalJS("CHAT.chat('" + JSON.stringify(dataContent)  + "')");
+						app.saveUserChatHistory(me.id, friendUserId, message, 1);
+						app.saveUserChatSnapshot(me.id, friendUserId, message, true);
+						// render msg on chat board, set button to be grey style and reset the input area
+						sendMsg(myFaceImg, message);
+						send_btn.setAttribute("class", "mui-btn-grey");
+						text_msg.value = '';
+
+						
+					
+						// Call netty server, send message to the backend.
+						//receiveMsg("test receive message");
+					})
+					
+					
+					
+					// when the KeyBoard is active, scroll to the latest chat history;
+					window.addEventListener("resize", function(e){
+						e.preventDefault();
+						scroll2Buttom();
+					});
+					
+				})
+				
+				/**
+				 * check network condition before sending message 
+				 * return false if network is not connected. 
+				 */
+				function checkNetWorkCondition(){
+					var currentCondition = plus.networkinfo.getCurrentType();
+					if ( currentCondition == plus.networkinfo.CONNECTION_UNKNOW 
+						|| currentCondition == plus.networkinfo.CONNECTION_NONE){
+						return false;
+					}
+					return true;
+				}
+				
+				/**
+				 * set the div scrolling to show the latest chat messages
+				 */
+				function scroll2Buttom(){
+					var areaMsgList = document.getElementById("msg");
+					areaMsgList.scrollTop = areaMsgList.scrollHeight - areaMsgList.offsetHeight;					
+				}
+				
+				function sendMsg(face_img, msg_content){
+					
+					var msg_html = '<div class="me_lists">' +
+										'<div class="header_img">' + 
+											'<img src="'+ face_img +'" width="40px" height="40px" />' +
+										'</div>' +
+										'<div class="msg-wrapper left">' +
+											'<p class="msg-right-blue">'+ msg_content +'</p> ' + 
+										'</div>' + 
+								    '</div>';
+
+					var msg_list = document.getElementById("msg");
+					
+					msg_list.insertAdjacentHTML("beforeend", msg_html);
+					
+					playSendMsgSound();
+					var me = app.getUserGlobalInfo();
+					
+				}
+				
+				
+				
+				function receiveMsg(msg_content){
+					
+					var msg_html =  '<div class="friend_lists">' +
+										'<div class="header_img">' +
+											'<img src="' + friendFaceImage + '" width="40px" height="40px" />'+
+										'</div>' +
+										'<div class="msg-wrapper right">' +
+											'<p class="msg-left-white">'+ msg_content +'</p>' +
+										'</div>' +
+									'</div>';
+
+					var msg_list = document.getElementById("msg");
+					
+					msg_list.insertAdjacentHTML("beforeend", msg_html);
+					playReceiveMsgSound();
+				}
+				
+				
+				function playSendMsgSound(){
+					var audioPlayer = plus.audio.createPlayer("../mp3/send.mp3");
+					audioPlayer.play();
+				}
+				
+				
+				function playReceiveMsgSound(){
+					var audioPlayer = plus.audio.createPlayer('../mp3/msn.mp3');
+					audioPlayer.play();
+				}
+				
+				function initChatHistory(){
+					var me = app.getUserGlobalInfo();
+					var myFaceImg = me.faceImage;
+					if (myFaceImg == null || myFaceImg.length == 0){
+						myFaceImg = "../css/registLogin/default_img.jpg"
+					}else{
+						myFaceImg = app.imgServerUrl + myFaceImg; 
+					}
+					var chatHistoryList = app.getUserChatHistory(me.id, friendUserId);
+					var totalMsgHTML = "";
+					for (var idx = 0 ; idx < chatHistoryList.length; idx++){
+						var singleMsg = chatHistoryList[idx];
+
+						if (singleMsg.flag == 1) {
+							totalMsgHTML += '<div class="me_lists">' +
+												'<div class="header_img">' + 
+													'<img src="'+ myFaceImg +'" width="40px" height="40px" />' +
+												'</div>' +
+												'<div class="msg-wrapper left">' +
+													'<p class="msg-right-blue">'+ singleMsg.msg +'</p> ' + 
+												'</div>' + 
+										    '</div>';
+						}else {
+							totalMsgHTML += '<div class="friend_lists">' +
+												'<div class="header_img">' +
+													'<img src="' + friendFaceImage + '" width="40px" height="40px" />'+
+												'</div>' +
+												'<div class="msg-wrapper right">' +
+													'<p class="msg-left-white">'+ singleMsg.msg +'</p>' +
+												'</div>' +
+											'</div>';
+						}
+						
+					}
+					
+					var msgListDOM = document.getElementById("msg");
+					msgListDOM.innerHTML = totalMsgHTML; 
+				}
+//			}(mui,document));
+		</script>
+		
+		<script src="../js/mui.min.js"></script>
+		<script type="application/javascript" src="../js/commons/app.js"></script>
+	</body>
+
+</html>

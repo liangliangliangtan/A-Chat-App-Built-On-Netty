@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.mychatappnetty.dao.FriendRequestDao">
+
+
+    <!-- send request between two user -->
+    <insert id="insertFriendsRequest" parameterType = "com.example.mychatappnetty.entity.FriendsRequest" useGeneratedKeys="false">
+        INSERT INTO tb_friends_request (id, send_user_id, accept_user_id,request_date_time)
+        VALUES (#{id},#{sendUserId}, #{acceptUserId},#{requestDateTime})
+    </insert>
+
+
+    <!-- query friends request and sort in descending order by request time -->
+    <select id="queryFriendsRequestByCondition" resultType= "com.example.mychatappnetty.entity.FriendsRequest">
+        SELECT
+            id, send_user_id,accept_user_id,request_date_time
+
+        FROM
+            tb_friends_request
+        <where>
+            <if test="id != null">
+                AND id = #{id}
+            </if>
+            <if test="sendUserId != null">
+                AND send_user_id = #{sendUserId}
+            </if>
+            <if test="acceptUserId != null">
+                AND accept_user_id = #{acceptUserId}
+            </if>
+        </where>
+        ORDER BY request_date_time DESC
+    </select>
+
+    <delete id="deleteFriendsRequestByCondition"
+            parameterType="com.example.mychatappnetty.entity.FriendsRequest">
+
+        DELETE FROM
+            tb_friends_request
+        <where>
+
+            <if test="id != null">
+                AND id = #{id}
+            </if>
+
+            <if test="sendUserId != null">
+                AND send_user_id = #{sendUserId}
+            </if>
+
+            <if test="acceptUserId != null">
+                AND accept_user_id = #{acceptUserId}
+            </if>
+
+        </where>
+    </delete>
+
+
+
+    <select id="queryFriendsRequestList"
+            parameterType="String"
+            resultType="com.example.mychatappnetty.entity.dto.vo.FriendsRequestVO">
+        SELECT u.id AS senderId,
+               u.username AS senderUsername,
+               u.nickname AS  senderNickname,
+               u.face_image AS senderProfileImg
+        FROM tb_users AS u
+
+        JOIN  tb_friends_request AS fr
+
+        ON  u.id = fr.send_user_id
+
+        WHERE  fr.accept_user_id = #{acceptUserId}
+
+    </select>
+
+
+</mapper>

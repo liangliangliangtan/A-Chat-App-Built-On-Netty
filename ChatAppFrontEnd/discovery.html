@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.min.css" rel="stylesheet" />
+	</head>
+
+	<body>
+		<div class="mui-content">
+		    <ul class="mui-table-view">
+		        <li id="li_open_moments"class="mui-table-view-cell mui-media">
+	                <img class="mui-media-object mui-pull-left" src="image/friends.png" style="max-width: 24px;max-height: 24px;">
+	                <p class="mui-ellipsis"><span style="font-size: 16px;text-align: center;margin-left: 10px;">Moment</span></p>
+		        </li>
+		        
+		    </ul>    
+		        <br/>
+		    <ul class="mui-table-view">
+		        <li id="li_add_friend" class="mui-table-view-cell mui-media">
+	                <img class="mui-media-object mui-pull-left" src="image/addfriends.png" style="max-width: 24px;max-height: 24px;">
+	                <p class="mui-ellipsis"><span style="font-size: 16px;text-align: center;margin-left: 10px;">Add friend</span></p>
+		        </li>
+		        
+		        
+		        <li id="li_scan" class="mui-table-view-cell mui-media">
+	                <img class="mui-media-object mui-pull-left" src="image/scanscan.png" style="max-width: 24px;max-height: 24px;">
+	                <p class="mui-ellipsis"><span style="font-size: 16px;text-align: center;margin-left: 10px;">Scan</span></p>
+		        </li>
+		        
+		    </ul>
+		</div>
+		<script src="js/mui.min.js"></script>
+		<script type="text/javascript" src="js/commons/app.js" ></script>
+		<script type="text/javascript">
+			mui.init();
+			var momentWebView = null; 
+			mui.plusReady(function(){
+				
+				mui.preload({
+                    url:"discoveryHTML/discovery_post.html",
+                    id:"discovery_post.html"
+                });
+                
+                var userInfo = app.getUserGlobalInfo();
+                
+                momentWebView = plus.webview.getWebviewById("discovery_post.html");
+                
+				var add_friend_dom =document.getElementById("li_add_friend");
+				var li_scan = document.getElementById("li_scan");
+				var li_open_moments = document.getElementById("li_open_moments");
+				
+				add_friend_dom.addEventListener("tap",function(){
+					mui.openWindow("discoveryHTML/discovery_searchfriend.html","discovery_searchfriend");
+				});
+				
+				li_scan.addEventListener("tap",function(){
+					mui.openWindow("discoveryHTML/discovery_qrcode.html","discovery_qrcode.html")
+				});
+				
+
+
+				li_open_moments.addEventListener("tap",function(){
+					plus.nativeUI.showWaiting("Loading");
+					setTimeout(function(){
+						// Routing to index page
+						mui.openWindow({
+						    id:'discovery_post.html'
+						});
+						plus.nativeUI.closeWaiting();
+					},1000)
+				});
+				
+			});
+		</script>
+	</body>
+
+</html>

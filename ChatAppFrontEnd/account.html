@@ -1,0 +1,186 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.min.css" rel="stylesheet" />
+	</head>
+
+	<body>
+		<script src="js/mui.min.js"></script>
+		<script type="text/javascript">
+			mui.init()
+		</script>
+		
+		<div class="mui-content">
+			<ul class="mui-table-view">
+			    <li class="mui-table-view-cell mui-media">
+			        <a id="link_profile_img" href="javascript:;">
+			        	<span class="mui-pull-right mui-icon mui-icon-arrowright"
+			        		  style="line-height: 42px; color: lightgray;margin-left: 3px;"></span>
+			            <img  id="img_account_face"class="mui-media-object mui-pull-right">
+			            <div class="mui-media-body" style="line-height: 42px; font-size: 16px;">
+			       			Profile Image
+			            </div>
+			        </a>
+			    </li>
+			    <li class="mui-table-view-cell mui-media">
+			        <a id="link_nick_name" href="javascript:;">
+			            <span class="mui-pull-right mui-icon mui-icon-arrowright"
+			        		  style="line-height: 42px;color: lightgray;margin-left: 3px;"></span>
+			        	<span id="span_nickname" class="mui-pull-right"
+			        		  style="line-height: 42px;font-size: 14px;color: gray;"></span>
+			            <div class="mui-media-body" style="line-height: 42px; font-size: 16px;">
+			              	Nick Name
+			            </div>
+			        </a>
+			    </li>
+			    <li class="mui-table-view-cell mui-media">
+			        <a href="javascript:;">
+			        	<span id="span_account" class="mui-pull-right"
+			        		  style="line-height: 42px;font-size: 14px;color: gray;"></span>
+			            <div class="mui-media-body" style="line-height: 42px; font-size: 16px;">
+			                Account 
+			            </div>
+   
+			        </a>
+			    </li>
+			    <li class="mui-table-view-cell mui-media">
+			        <a href="javascript:;">
+			        	<span id="span_email" class="mui-pull-right"
+			        		  style="line-height: 42px;font-size: 14px;color: gray;"></span>
+			            <div class="mui-media-body" style="line-height: 42px; font-size: 16px;">
+			                Email
+			            </div>
+   
+			        </a>
+			    </li>
+			    <li class="mui-table-view-cell mui-media">
+			        <a  id="link_qr_code" href="javascript:;">
+			        	<span class="mui-pull-right mui-icon mui-icon-arrowright"
+			        		  style="line-height: 42px;color: lightgray;margin-left: 3px;"></span>
+			            <img  id = "qrcode" class="mui-media-object mui-pull-right" src="image/qrcode.png"
+			            	  style="max-width: 20px; height: 20px; line-height: 42px;">
+			            <div class="mui-media-body"style="line-height: 42px; font-size: 16px;">
+			                QR Code
+			            </div>
+			        </a>
+			    </li>
+			</ul>
+		
+			<br />
+			
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell mui-media">
+			        <a id="link_sign_out" href="javascript:;">
+			            <div class="mui-media-body" style="line-height: 42px; font-size: 16px; text-align: center;">
+			                Sign Out
+			            </div>
+			        </a>
+			    </li>
+			</ul>
+		</div>
+	</body>
+	
+	<script type="text/javascript" src="js/commons/app.js" ></script>
+	<script type="application/javascript">
+		mui.plusReady(function(e){
+			
+			let accountWebView = plus.webview.currentWebview();
+			
+			accountWebView.addEventListener('show',function(){
+				if(app.getUserGlobalInfo()!= null){
+					refreshUserInfo();
+				}
+			},{ passive: false});
+			
+			var link_profile_img_dom = document.getElementById('link_profile_img');
+			var link_nickname_dom = document.getElementById('link_nick_name');
+			
+			/**
+			 * Click the profile image,it will go to the profile_image page.
+			 */
+			link_profile_img_dom.addEventListener('tap',function(){
+				mui.openWindow("accountHTML/profile_image.html","profile_image.html")
+			}, { passive: false });
+			
+			/**
+			 * Click the nickname,it will go to the profile_nickname page.
+			 */
+			link_nickname_dom.addEventListener('tap',function(){
+				mui.openWindow("accountHTML/profile_nickname.html","profile_nickname.html")
+			}, { passive: false });
+			
+			link_qr_code.addEventListener('tap',function(){
+				mui.openWindow("accountHTML/profile_qrcode.html","profile_qrcode.html")
+			}, { passive: false });
+			
+			
+			var link_sign_out = document.getElementById("link_sign_out");
+			
+			/**
+			 * Sign our remove userInfo key. 
+			 */
+			link_sign_out.addEventListener('tap',function(){
+				
+				var username = app.getUserGlobalInfo().username;
+				var faceImgBig = app.getUserGlobalInfo().faceImageBig;
+				
+				plus.storage.removeItem("userInfo");
+				plus.storage.setItem("userName",username);
+				plus.storage.removeItem("contactList");
+				
+				if(faceImgBig != null && faceImgBig.length != 0){
+					plus.storage.setItem("faceImgBig",faceImgBig);
+				}
+				
+				// trigger the user-defined refresh event on their webviews 
+				// by refreshing user information
+				mui.openWindow("login.html","login.html");
+				
+				var loginPageWebView = plus.webview.getWebviewById("login.html");
+				mui.fire(loginPageWebView,"refresh")
+				
+			}, { passive: false });
+			
+			
+			window.addEventListener("refresh",function(){
+				console.log("refresh account page");
+				refreshUserInfo();
+			});
+			
+		})
+		
+		/**
+		 * Refresh this page when the account page webview is shown
+		 */
+		function refreshUserInfo(){
+			let userInfo = app.getUserGlobalInfo();
+			let faceImg = userInfo.faceImage;
+			let email = userInfo.userEmail;
+			let username = userInfo.username;
+			let nickname = userInfo.nickname;
+			let qrcode = userInfo.qrcode;
+			
+			var img_tag = document.getElementById('img_account_face');
+			if(faceImg != null && faceImg.length != 0){
+				img_tag.src = app.imgServerUrl + faceImg;
+			}else{
+				img_tag.src ="css/registLogin/default_img.jpg"
+			}
+			
+			var span_nickname = document.getElementById('span_nickname');
+			span_nickname.innerHTML = nickname;
+			
+			var span_email = document.getElementById('span_email');
+			span_email.innerHTML = email;
+			
+			var span_account = document.getElementById('span_account');
+			span_account.innerHTML = username;
+		};
+		
+	</script>
+
+</html>

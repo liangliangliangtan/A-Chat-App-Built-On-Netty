@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="x-ua-compatible" content="ie=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title>Cropper</title>
+		<script src="../../js/mui.min.js"></script>
+		<link  href="../../css/mui.min.css" rel="stylesheet" />
+		<link  href="../../css/header.css" rel="stylesheet"/>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+		<link rel="stylesheet" href="../cropper/css/cropper.css" />
+		<link rel="stylesheet" href="../../css/registLogin/main.css">
+		<link rel="stylesheet" href="../../css/font/fontpage.css" />
+		
+		<style>
+			#container {
+				width: 100%;
+				position: absolute;
+				top: 44px;
+				bottom: 0px;
+				background:#000000;
+				background-size: contain;
+			}
+			
+			img {
+			    max-width: 100%;
+			    max-height: 100%;
+			}
+			
+		</style>
+	</head>
+
+	<body>
+		
+		<header class="mui-bar mui-bar-nav bg-deepblue">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left" style="color: #FFFFFF;"></a>	    
+		    <a class="mui-icon mui-icon-right-nav mui-pull-right" 
+		       id="cutter"
+		       style="color: #FFFFFF; text-align: center;" >
+		       <img src="../../image/upload.png" width="20px"/>
+		    </a>
+		    <h1 id="img_title" class="mui-title text-write">Choose Image</h1>
+		</header>
+
+		<!-- Content -->
+		<div id="container">
+			<div class="img-container">
+				<img id="image" src="" style="background-color: #000000;">
+			</div>
+		</div>
+
+		<!-- Scripts -->
+		<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.bundle.min.js"></script>
+		<script src="https://fengyuanchen.github.io/js/common.js"></script>
+		<script type="text/javascript" src="../cropper/js/cropper.js" ></script>
+		<script type="text/javascript" src="../../js/commons/app.js" ></script>
+
+		<script type="text/javascript">
+			mui.init();
+			
+			var img_title = document.getElementById("img_title");
+			var $image = $('#image');
+			mui.plusReady(function() {
+				
+				var tyname = plus.webview.currentWebview().type_name
+				console.log(tyname)
+				img_title.innerHTML = tyname
+				
+				var user = app.getUserGlobalInfo();
+				var faceImage = user.faceImageBig;
+				// 获取屏幕宽度，设置图片
+				$image.attr('src', app.imgServerUrl + faceImage);
+				
+				/** ======================== Choosing images from the picture folder ======================== **/
+					// Selecting images from image folders
+					console.log("Choose images....");
+					// pick iamges from the client phone
+				    plus.gallery.pick( function(path){
+				    	
+				    	$image.attr('src', path);
+				    	
+				    	faceCutter();
+				    }, function ( e ) {
+				    	mui.openWindow("index.html", "index.html");				    	
+				    }, {filter:"image"} );
+				
+				/** ======================== Cropping images ======================== **/
+				
+				$("#cutter").on('tap', function() {
+					
+					plus.nativeUI.showWaiting("Uploading");
+					
+					var cropper = $image.data('cropper');
+					var result = $image.cropper("getCroppedCanvas");
+					if(result) {
+						// header information is not included.
+						var base64Url = result.toDataURL().split(',')[1];
+						console.log(base64Url);
+						//TODO: UPLOAD IMAGE 
+						if ( tyname == "Profile Img"){
+							mui.ajax(app.serverUrl + "/upload/uploadprofileimg",{
+								data:{
+									userId:user.id,
+									faceData: base64Url
+								},
+								dataType:'json',//Server return Json Type data
+								type:'post',//HTTP Request time 
+								timeout:10000,//Wait Time out 10 second；
+								headers:{'Content-Type':'application/json'},	              
+								success:function(data){	
+									plus.nativeUI.closeWaiting();
+									if (data.status == 200) {
+										// modify the userinformation
+										var userInfo = data.data;
+										console.log(JSON.stringify(userInfo));
+										app.setUserGlobalInfo(userInfo);
+										
+										// trigger the user-defined refresh event on their webviews 
+										// by refreshing user information
+										var accountWebView = plus.webview.getWebviewById("account.html");
+										var profileImgView = plus.webview.getWebviewById("profile_image.html");
+										mui.fire(accountWebView,"refresh")
+										mui.fire(profileImgView,"refresh")
+										
+										mui.openWindow("index.html", "index.html");
+										
+									} else {
+										// show error msg on Mobile
+										console.log(data.msg);
+										app.showToast(data.msg, "error");
+									}
+								}
+							});
+						}else{
+							
+							mui.ajax(app.serverUrl + "/upload/uploadmomentbackgroundImg",{
+								data:{
+									userId:user.id,
+									momentImgData: base64Url
+								},
+								dataType:'json',//Server return Json Type data
+								type:'post',//HTTP Request time 
+								timeout:10000,//Wait Time out 10 second；
+								headers:{'Content-Type':'application/json'},	              
+								success:function(data){	
+									plus.nativeUI.closeWaiting();
+									if (data.status == 200) {
+										// modify the userinformation
+										var userInfo = data.data;
+										console.log(JSON.stringify(userInfo));
+										app.setUserGlobalInfo(userInfo);
+										mui.openWindow({
+										    id:'discovery_post.html'
+										});
+									} else {
+										// show error msg on Mobile
+										console.log(data.msg);
+										app.showToast(data.msg, "error");
+									}
+								}
+							});
+						}
+					}
+				});
+			});
+			
+			function faceCutter() {
+				
+				plus.nativeUI.showWaiting( "Loading..." );
+				
+//				var $image = $('#image');
+				var options = {
+					aspectRatio: 1 / 1,
+					crop: function(e) {}
+				};
+			
+				// Cropper
+				$image.cropper(options);
+				
+				plus.nativeUI.closeWaiting();
+			}
+		</script>
+
+	</body>
+
+</html>

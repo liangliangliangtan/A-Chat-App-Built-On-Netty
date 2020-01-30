@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mychatappnetty.dao.ValidateDao">
+
+
+    <!--Insert One Validation record -->
+    <insert id="insertRecord" parameterType="com.example.mychatappnetty.entity.Validates"
+            useGeneratedKeys="true"
+            keyColumn="id"
+            keyProperty="id">
+        INSERT INTO tb_validate (user_id,user_email, reset_token,`type`,
+        create_time,modified_time)
+        VALUES (#{userId}, #{userEmail}, #{resetToken}, #{type}, #{createTime},#{modifiedTime})
+    </insert>
+
+
+    <select id="queryRecordByCondition" resultType= "com.example.mychatappnetty.entity.Validates">
+        SELECT * FROM tb_validate
+        <where>
+            <if test="resetToken != null">
+                AND reset_token = #{resetToken}
+            </if>
+            <if test="userEmail != null">
+                AND user_email = #{userEmail}
+            </if>
+            <if test="type != null">
+                AND `type` = #{type}
+            </if>
+        </where>
+    </select>
+
+    <update id="updateValidate" parameterType="com.example.mychatappnetty.entity.Validates">
+        UPDATE  tb_validate SET modified_time = #{modifiedTime} WHERE reset_token = #{resetToken}
+    </update>
+</mapper>

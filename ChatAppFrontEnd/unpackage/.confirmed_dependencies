@@ -1,0 +1,92 @@
+{
+	"index.html": {
+		"resources": [
+			"chatlist.html",
+			"contact.html",
+			"account.html"
+		],
+		"refer": [
+			"contact.html",
+			"account.html",
+			"discovery.html",
+			"chatlist.html"
+		]
+	},
+	"register.html": {
+		"refer": [
+			"login.html"
+		],
+		"resources": []
+	},
+	"login.html": {
+		"refer": [
+			"register.html",
+			"index.html"
+		],
+		"resources": []
+	},
+	"account.html": {
+		"refer": [
+			"accountHTML/profile_image.html",
+			"accountHTML/profile_nickname.html",
+			"accountHTML/profile_qrcode.html",
+			"login.html"
+		],
+		"resources": []
+	},
+	"accountHTML/profile_image.html": {
+		"refer": [
+			"plugin/v3.1.6/myface-uploader.html"
+		],
+		"resources": []
+	},
+	"discovery.html": {
+		"refer": [
+			"discoveryHTML/discovery_searchfriend.html",
+			"discoveryHTML/discovery_qrcode.html",
+			"discoveryHTML/discovery_posts.html",
+			"discoveryHTML/discovery_post.html"
+		],
+		"resources": []
+	},
+	"discoveryHTML/discovery_searchfriend.html": {
+		"refer": [
+			"discoveryHTML/discovery_searchfriendresult.html"
+		],
+		"resources": []
+	},
+	"discoveryHTML/discovery_qrcode.html": {
+		"refer": [
+			"discoveryHTML/discovery_searchfriendresult.html"
+		],
+		"resources": []
+	},
+	"discoveryHTML/discovery_post.html": {
+		"refer": [
+			"discoveryHTML/edit_posts.html",
+			"plugin/v3.1.6/myface-uploader.html"
+		],
+		"resources": []
+	},
+	"contact.html": {
+		"refer": [
+			"chatHTML/chatting.html"
+		]
+	},
+	"chatHTML/chatting.html": {
+		"resources": [
+			"js/commons/app.js",
+			"image/img-8d466a4c76304535a80df99986e74813.jpg",
+			"js/mui.min.js",
+			"css/registLogin/default_img.jpg",
+			"css/mui.min.css",
+			"css/chat.css",
+			"css/header.css"
+		]
+	},
+	"chatlist.html": {
+		"refer": [
+			"chatHTML/chatting.html"
+		]
+	}
+}

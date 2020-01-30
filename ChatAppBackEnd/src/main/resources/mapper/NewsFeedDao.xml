@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.mychatappnetty.dao.NewsFeedDao">
+
+    <insert id="batchInsertNewsFeed"
+            parameterType="java.util.List"
+            useGeneratedKeys="false">
+        INSERT INTO
+        tb_news_feed(id,user_id,post_id,create_time)
+        VALUES
+        <foreach collection="list" item="newsFeed" index="index"
+                 separator=",">
+            (
+                #{newsFeed.id},
+                #{newsFeed.userId},
+                #{newsFeed.postId},
+                #{newsFeed.createTime}
+            )
+        </foreach>
+    </insert>
+
+
+    <select id="queryNewsFeedByUserId" resultType="com.example.mychatappnetty.entity.NewsFeed">
+        SELECT
+            id, user_id, post_id, create_time
+        FROM
+            tb_news_feed
+        WHERE
+            user_id = #{userId}
+        ORDER BY
+            create_time DESC
+        LIMIT
+            #{pageNumber},#{pageSize};
+    </select>
+
+
+    <delete id="deleteNewsFeedByPostId">
+        DELETE
+        FROM
+            tb_news_feed
+        WHERE
+            post_id = #{postId}
+    </delete>
+
+</mapper>

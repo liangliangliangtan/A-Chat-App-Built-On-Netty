@@ -1,0 +1,175 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<link href="../css/header.css" />
+		<link rel="stylesheet" href="../css/font/fontpage.css" />
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav bg-deepblue">
+			
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left" style="color: #FFFFFF;"></a>
+		    
+		    <a class="mui-icon mui-icon-right-nav mui-pull-right" 
+		       id="open_profile_img_menu"
+		       style="color: #FFFFFF; text-align: center;">
+		       	<span style="text-align: center; font-size: 14px;font-weight:bold;">
+		       		···
+		       	</span>
+		    </a>
+		    <h1 class="mui-title text-write">Profile Image</h1>
+		</header>
+		
+		
+		<div class="mui-content">
+		    <img id ='profile_img_detail' src=""/>
+		</div>
+		
+		<div id="sheet_profile_img" class="mui-popover mui-popover-bottom mui-popover-action ">
+		    <!-- Menu Options -->
+		    <ul class="mui-table-view">
+		      <li class="mui-table-view-cell">
+		        <a id="choose_profile_img" href="#">Select Image</a>
+		      </li>
+		      <li class="mui-table-view-cell">
+		        <a id="save_profile_img" href="#">DownLoad Image</a>
+		      </li>
+		    </ul>
+		    <!-- Hidden the meanu -->
+		    <ul class="mui-table-view">
+		      <li class="mui-table-view-cell">
+		        <a href="#sheet_profile_img"><b>Cancel</b></a>
+		      </li>
+		    </ul>
+		</div>
+		
+		
+		<script src="../js/commons/app.js"></script>
+		<script src="../js/mui.min.js"></script>
+		<script type="text/javascript">
+			mui.init()
+		</script>
+		
+		<script type="application/javascript">
+			/**
+			 * Render the profile img by userInfo; 
+			 */
+			mui.plusReady(function(){		
+				// refresh the profile Img if anything changes 
+				refreshProfileImgBig();
+			});
+			
+			/**
+			 * Open the image menu in order to manipulate that img 
+			 */
+			mui.plusReady(function(){
+				let openMenu = document.getElementById('open_profile_img_menu');
+				openMenu.addEventListener('tap',function(){
+					mui('#sheet_profile_img').popover('toggle');
+				}, { passive: false });
+			});
+			
+			/**
+			 * Menu operation:
+			 * １.　ｓａｖｅ　ｉｍｇ
+			 * ２．　ｄｏｗｎｌｏａｄＩｍｇ
+			 */
+			mui.plusReady(function(){
+				let chooseImg = document.getElementById('choose_profile_img');
+				let downloadImg = document.getElementById('save_profile_img');
+				
+				/**
+				 * Choose Images from client phone 
+				 */
+				chooseImg.addEventListener('tap',function(){
+					console.log('chooseImg');
+					mui.openWindow({
+						url: '../plugin/v3.1.6/myface-uploader.html',
+						id: 'myface-uploader.html',
+						extras: {  
+                        	type_name: 'Profile Img'  
+                    	},  
+						createNew: true});
+					mui('#sheet_profile_img').popover('toggle');
+				}, { passive: false })
+				
+				
+				/**
+				 * 	download images from the images server 
+				 */
+				downloadImg.addEventListener('tap',function(){
+					console.log('saveImg');
+					
+					plus.nativeUI.showWaiting("Downloading");
+					
+					var user =app.getUserGlobalInfo();
+					var faceImg = user.faceImageBig; 
+					var imgURL;
+					if(faceImg != null){
+						imgURL = app.imgServerUrl + faceImg;
+					}else{
+						imgURL = "css/registLogin/default_img.jpg";
+					}
+					
+					/**
+					 * Download the imgs through http protocal, 
+					 * and save the temp file to client phone
+					 */
+					var imgDownloadTask = plus.downloader.createDownload(imgURL,{}, function(downloadFile, status){
+						plus.nativeUI.closeWaiting();
+						if(status == 200){
+							var tempFile = downloadFile.filename;
+							plus.gallery.save(tempFile,function(){
+								app.showToast("Save Image Success", "success");
+								mui('#sheet_profile_img').popover('toggle');
+							})
+							
+						}else{
+							console.log("error")
+							app.showToast("Download image failed","error")
+						}
+					})
+					
+					imgDownloadTask.start();
+					
+				}, { passive: false })
+			});	
+			
+			function refreshProfileImgBig() {
+				let userInfo = app.getUserGlobalInfo();
+				console.log(JSON.stringify(userInfo))
+				let profile_img_dom = document.getElementById('profile_img_detail');
+				if(userInfo.faceImageBig != null && userInfo.faceImageBig.length != 0){
+					var faceImageBig = userInfo.faceImageBig;
+					console.log(faceImageBig)
+					profile_img_dom.src = app.imgServerUrl + faceImageBig;
+				}else{
+					profile_img_dom.src="../css/registLogin/default_img.jpg"
+				}
+				//get the width of the mobile screen
+				let imgWidth = document.body.clientWidth;
+				// square size 
+				profile_img_dom.width = imgWidth;
+				profile_img_dom.height = imgWidth;
+			};
+			
+			mui.plusReady(function(){
+				/**
+				 * add  an user-defined refresh event to the webview  
+				 */
+				window.addEventListener("refresh",function(){
+					refreshProfileImgBig();
+				}, { passive: false })
+			})
+			
+		</script>
+		
+		
+	</body>
+
+</html>

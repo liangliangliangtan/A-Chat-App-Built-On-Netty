@@ -1,0 +1,20 @@
+.text-deepblue{
+	color: #347eff;
+}
+
+.bg-write{
+	background-color:#FFFFFF;
+}
+
+.bg-deepblue{
+	background-color:#347eff;
+}
+
+.text-write{
+	color:#FFFFFF;
+}
+
+.touch-action{
+	touch-action: none;
+}
+

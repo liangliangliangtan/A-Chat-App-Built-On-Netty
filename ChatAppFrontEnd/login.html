@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<script src="js/mui.min.js"></script>
+
+		<link rel="stylesheet" type="text/css" href="css/registLogin/util.css">
+		<link rel="stylesheet" type="text/css" href="css/registLogin/main.css">
+
+		<script type="text/javascript" charset="utf-8">
+			mui.init();
+		</script>
+
+		<style>
+			
+			.p-t-85 {
+				padding-top: 10px;
+			}
+			
+			.p-b-70 {
+				padding-bottom: 35px;
+			}
+			
+			.m-t-85 {
+				margin-top: 15px;
+			}
+			
+			.container-login100 {
+				padding: 25px;
+			}
+			
+			/*toast notification*/
+			.mui-toast-container {
+				bottom: 50% !important;
+			}
+			.mui-toast-message {
+				opacity: 0.6;
+				color: #fff;
+				width: 180px;
+				padding: 70px 5px 10px 5px;
+			}
+			.reset-password{
+				float:left
+			}
+			.create-new-account{
+				float:right
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="mui-content">
+			<div class="container-login100">
+				<div class="wrap-login100 p-t-85 p-b-20">
+					<form id="userform">
+						<span class="login100-form-title p-b-70">
+							<h5>Chat App </h5>
+						</span>
+						<span class="login100-form-avatar">
+							<img id="img_login_face" src="css/registLogin/default_img.jpg" >
+						</span>
+
+						<div class="wrap-input100 validate-input m-t-85 m-b-35">
+							<input class="input100" type="text" id="username" name="username" placeholder="UserName">
+							<span class="focus-input100"></span>
+						</div>
+
+						<div class="wrap-input100 validate-input m-b-35">
+							<input class="input100" type="password" id="txt_password" name="password" placeholder="Password">
+							<span class="focus-input100"></span>
+						</div>
+						
+						
+						<div class="mui-button-row mui-row router">
+							<button type="button" class="mui-btn mui-btn-primary reset-password">Forget password?</button>
+							<button type="button" class="mui-btn mui-btn-primary create-new-account">Create new account</button>
+						</div>
+						
+						<div class="container-login100-form-btn p-t-30">
+							<button type="submit" id="login" class="login100-form-btn">
+								Sign In
+							</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+		
+		<script type="text/javascript" src="js/commons/app.js" ></script>
+		<script type="text/javascript">
+			mui.plusReady(function(){
+				// forbidden back 
+				mui.back = function(){
+					return false;
+				}
+			})
+			
+			mui.plusReady(function() {
+				
+				
+				var userInfo = app.getUserGlobalInfo();
+				if (userInfo != null) {
+					mui.openWindow("index.html", "index.html");
+				}
+				
+				var userform = document.getElementById("userform");
+				var username = document.getElementById("username");
+				var txt_password = document.getElementById("txt_password");
+				var img_login = document.getElementById("img_login_face");
+				
+				
+				/**
+				 * If the user is logged in with its previous logged account ,show the user's img ,
+				 * other wise show default profile img 
+				 */
+				username.addEventListener("input", function(e){
+					if(plus.storage.getItem("faceImgBig").length == 0){
+						return; 
+					}
+					
+					if(username.value == plus.storage.getItem("userName")){
+						img_login.src =  app.imgServerUrl + plus.storage.getItem("faceImgBig");
+					}else{
+						img_login.src = "css/registLogin/default_img.jpg";
+					}
+				}, { passive: false })
+				
+				
+				userform.addEventListener("submit", function(e){
+					// if the username is null
+					if (!app.isNotNull(username.value)) {
+						// focus the empty username
+						username.focus();
+					} else if (!app.isNotNull(txt_password.value)) {
+						// focus on the password
+						txt_password.focus();
+					} else {
+						// username and password cannot be too long
+						if (username.value.length > 12) {
+							app.showToast("Username cannot longer than 12 ", "error");
+							return false;
+						} else if (txt_password.value.length > 12) {
+							app.showToast("Password cannot longer than 12 ", "error");
+							return false;
+						}
+						
+						// Each client has a unique client id.(will be used later)
+						var cid = plus.push.getClientInfo().clientid;
+						// Ajax to call the backend Server
+						mui.ajax(app.serverUrl + "/user/login",{
+							data:{
+								username:username.value,
+								password:txt_password.value,
+								cid: cid
+							},
+							dataType:'json',//Server return Json Type data
+							type:'post',//HTTP Request time 
+							timeout:10000,//Wait Time out 10 second；
+							headers:{'Content-Type':'application/json'},	              
+							success:function(data){
+								//服务器返回响应，根据响应结果，分析是否登录成功；
+								console.log(JSON.stringify(data));
+								
+								username.blur();
+								txt_password.blur();
+								
+								if (data.status == 200) {
+									// 登录或者注册成功之后，保存全局用户对象到本地缓存
+									// When log in successfully , add the user to global cache
+									var userInfoJson = data.data;
+									console.log(JSON.stringify(userInfoJson))
+									app.setUserGlobalInfo(userInfoJson);
+									plus.storage.removeItem("userName");
+									plus.storage.removeItem("faceImgBig");
+									
+									
+									// trigger the user-defined refresh event on their webviews 
+									// by refreshing user information
+									
+									plus.nativeUI.showWaiting("Loading");
+									var accountWebView = plus.webview.getWebviewById("account.html");
+									var profileImgView = plus.webview.getWebviewById("profile_image.html");
+									var contactWebview = plus.webview.getWebviewById("contact.html");
+									var chatListView = plus.webview.getWebviewById("chatlist.html");
+									
+									mui.fire(accountWebView,"refresh");
+									mui.fire(profileImgView,"refresh");
+									mui.fire(chatListView,"refresh");
+									mui.fire(contactWebview,"refresh");
+									
+									plus.nativeUI.showWaiting("Loading");
+									setTimeout(function(){
+										// Routing to index page 
+										mui.openWindow("index.html", "index.html");
+										plus.nativeUI.closeWaiting();
+									},3000)
+									
+									
+								} else {
+									// show error msg on Mobile
+									app.showToast(data.msg, "error");
+								}
+							}
+						});
+						
+					}
+					// prevent submit form 
+					e.preventDefault();
+				}, { passive: false });
+				
+				
+			})
+		</script>
+		
+		<script type="text/javascript">	
+			/**
+			 * Routing to the reset-password page and 
+			 * and the register page 
+			 */
+			mui.plusReady(function(){
+				mui('.router').on('tap','.reset-password',function(){
+					mui.openWindow("index.html", "index.html");
+				}, { passive: false })
+				mui('.router').on('tap','.create-new-account',function(){
+					mui.openWindow("register.html", "create-new-account.html");
+				}, { passive: false }) 
+			})
+			
+			
+			
+			mui.plusReady(function(){
+				/**
+				 * add  an user-defined refresh event to the webview  
+				 */
+				window.addEventListener("refresh",function(){
+					var username = document.getElementById("username");
+					var img_login = document.getElementById("img_login_face");
+					var txt_password = document.getElementById("txt_password");
+					console.log(plus.storage.getItem("userName"));
+					console.log(plus.storage.getItem("faceImgBig"));
+					username.value = plus.storage.getItem("userName");
+					txt_password.value = "";
+					if(plus.storage.getItem("faceImgBig").length != 0){
+						img_login.src = app.imgServerUrl + plus.storage.getItem("faceImgBig");
+					}else{
+						img_login.src = "css/registLogin/default_img.jpg"
+					}
+					// forbidden back to login pages
+				}, { passive: false })
+			})
+		</script>
+		
+		
+	</body>
+
+</html>

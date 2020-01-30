@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<link href="../css/header.css" />
+		<link rel="stylesheet" href="../css/font/fontpage.css" />
+		<style>
+			#btn_add_friend {
+	        	background-color: #347eff;
+	        }
+	        #btn_add_friend:active {
+	            background-color: #87CEFA;
+	        }
+		</style>
+		
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav bg-deepblue">
+			
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left" style="color: #FFFFFF;"></a>
+		    <h1 class="mui-title text-write">Profile</h1>
+		</header>
+		
+		
+		<div class="mui-content">
+			<!---->
+			<ul class="mui-table-view">
+			    <li class="mui-table-view-cell mui-media" style="padding-top: 10px;">
+			        <a href="javascript:;">
+			            <img id="img_friend_face" class="mui-media-object mui-pull-left" src="" 
+			            	style="border-radius: 8%;line-height: 50px;max-width: 50px;height: 50px;">
+			            <div class="mui-media-body">
+			               	<label id="lab_friend_nickname"></label>
+			                <p id="p_friend_username" class="mui-ellipsis"></p>
+			            </div>
+			        </a>
+			    </li>
+			</ul>
+
+			<br/>
+			<!-- Button: ADD/Return -->
+			<div style="text-align: center;">
+				<button id="btn_add_friend" type="button" class="mui-btn mui-btn-block" 
+					style="color: white;width: 90%;display: inline;padding: 12px 0;">Add to Contact</button>
+				<button id="btn_back" type="button" class="mui-btn mui-btn-block" 
+					style="width: 90%;display: inline;padding: 12px 0">Return</button>
+			</div>
+		</div>
+
+		
+		
+		<script src="../js/commons/app.js"></script>
+		<script src="../js/mui.min.js"></script>
+		<script type="text/javascript">
+			mui.init()
+		</script>
+		
+		<script type="application/javascript">
+			mui.plusReady(function(){
+				
+				// get the friendInfo passed by previous webview
+				var curWebView = plus.webview.currentWebview();
+				var friendInfo = curWebView.friendInfo;
+				
+				
+				//Get dom nodes
+				var img_friend_face = document.getElementById("img_friend_face");
+				var lab_friend_nickname = document.getElementById("lab_friend_nickname");
+				var p_friend_username = document.getElementById("p_friend_username");
+				
+				
+				//Render the DOM nodes 
+				if(friendInfo.faceImage.length > 0 ){
+					img_friend_face.src = app.imgServerUrl + friendInfo.faceImage;
+				}else{
+					img_friend_face.src = "../css/registLogin/default_img.jpg";
+				}
+				
+				lab_friend_nickname.innerHTML = friendInfo.nickname;
+				p_friend_username.innerHTML = "account: " + friendInfo.username;
+				
+				
+				var btn_add_friend = document.getElementById("btn_add_friend");
+				btn_add_friend.addEventListener("tap", function(){
+					
+					plus.nativeUI.showWaiting("Loading");
+					
+					mui.ajax(app.serverUrl + '/user/sendfriendshiprequest',{
+						
+						data:{
+							fromUserId: app.getUserGlobalInfo().id,
+							toUserName: friendInfo.username
+						},
+						
+						dataType:'json',//Server return Json Type data
+						type:'post',//HTTP Request time 
+						timeout:10000,//Wait Time out 10 second；
+						success:function(data){	
+							plus.nativeUI.closeWaiting();
+							if (data.status == 200) {
+								// modify the user nickname 
+								app.showToast("Your adding contact request has been send", "success");
+								mui.openWindow("index.html", "index.html");
+							} else {
+								// show error msg on Mobile
+								console.log(data.msg);
+								app.showToast(data.msg, "error");
+							}
+						}
+					});
+				},{passive:false})
+				
+				
+				var btn_back = document.getElementById("btn_back");
+				
+				btn_back.addEventListener("tap",function(){
+					mui.back();
+				})	
+			})
+		</script>
+		
+		
+	</body>
+
+</html>

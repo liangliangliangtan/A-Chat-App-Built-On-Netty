@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.mychatappnetty.dao.FriendDao">
+
+
+  <!-- Add relationship between two user -->
+  <insert id="insertFriendShip" parameterType="com.example.mychatappnetty.entity.MyFriends"
+    useGeneratedKeys="false">
+        INSERT INTO tb_my_friends (id, my_user_id, my_friend_user_id)
+        VALUES (#{id},#{myUserId}, #{myFriendUserId})
+   </insert>
+
+
+  <!-- query friendship  -->
+  <select id="searchFriendShipByCondition" resultType="com.example.mychatappnetty.entity.MyFriends">
+    SELECT id, my_user_id, my_friend_user_id FROM tb_my_friends
+    <where>
+      <if test="id != null">
+        AND id = #{id}
+      </if>
+      <if test="myUserId != null">
+        AND my_user_id = #{myUserId}
+      </if>
+      <if test="myFriendUserId != null">
+        AND my_friend_user_id = #{myFriendUserId}
+      </if>
+    </where>
+  </select>
+
+
+  <select id="queryFriendsByUserId"
+    resultType="com.example.mychatappnetty.entity.dto.vo.MyFriendsVO"
+    parameterType="String">
+        SELECT fr.my_friend_user_id AS friendUserId, u.face_image AS friendFaceImage,
+                u.face_image_big AS friendImageBig,
+                u.nickname AS friendNickname, u.username AS friendUsername
+        FROM tb_my_friends AS fr
+        LEFT JOIN  tb_users AS u
+        ON u.id = fr. my_friend_user_id
+        WHERE fr. my_user_id = #{userId}
+  </select>
+</mapper>

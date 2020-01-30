@@ -1,0 +1,104 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<link href="../css/header.css" />
+		<link rel="stylesheet" href="../css/font/fontpage.css" />
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav bg-deepblue">
+			
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left" style="color: #FFFFFF;"></a>
+		    
+		    <a class="mui-icon mui-icon-right-nav mui-pull-right" 
+		       id="search_friend_trigger"
+		       style="color: #FFFFFF;">
+		       <span style="text-align: center; font-size: 14px;">
+		       	Search
+		       </span>
+		    </a>
+		    <h1 class="mui-title text-write">Add Friend</h1>
+		</header>
+		
+		
+		<div class="mui-content">
+		    <div class="mui-input-row">
+		        <input id='txt_toUserName' type="text" class="mui-input-speech mui-input-clear" 
+		        	   placeholder="please enter your friend username">
+		    </div>    
+		</div>
+
+		
+		
+		<script src="../js/commons/app.js"></script>
+		<script src="../js/mui.min.js"></script>
+		<script type="text/javascript">
+			mui.init()
+		</script>
+		
+		<script type="application/javascript">
+			mui.plusReady(function(){
+				
+				
+				var searchNameDom = document.getElementById('search_friend_trigger');
+				
+				
+				
+				searchNameDom.addEventListener('tap',function(){
+					
+					
+					var fromUserId = app.getUserGlobalInfo().id;
+					
+					var toUserName = document.getElementById('txt_toUserName').value;
+					
+					if(toUserName == null || toUserName.length == 0){
+						app.showToast("Searching  without username is not allowed","error");
+						return;
+					}
+					
+					plus.nativeUI.showWaiting("Searching");
+					
+					mui.ajax(app.serverUrl + '/user/searchuser',{
+						
+						data:{
+							fromUserId: fromUserId,
+							toUserName: toUserName
+						},
+						
+						dataType:'json',//Server return Json Type data
+						type:'post',//HTTP Request time 
+						timeout:10000,//Wait Time out 10 second；
+						success:function(data){	
+							plus.nativeUI.closeWaiting();
+							if (data.status == 200) {
+								// modify the user nickname 
+								var searcheduserInfo = data.data;
+								console.log(JSON.stringify(searcheduserInfo));
+								mui.openWindow({
+												url:"discovery_searchfriendresult.html",
+												id:"discovery_searchfriendresult.html",
+												extras:{
+													friendInfo:searcheduserInfo
+												}
+											  });
+							} else {
+								// show error msg on Mobile
+								console.log(data.msg);
+								app.showToast(data.msg, "error");
+							}
+						}
+					});
+					
+				},{ passive: false})
+			});
+		</script>
+		
+		
+	</body>
+
+</html>

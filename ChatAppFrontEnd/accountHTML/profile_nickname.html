@@ -1,0 +1,110 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<link href="../css/header.css" />
+		<link rel="stylesheet" href="../css/font/fontpage.css" />
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav bg-deepblue">
+			
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left" style="color: #FFFFFF;"></a>
+		    
+		    <a class="mui-icon mui-icon-right-nav mui-pull-right" 
+		       id="set_user_nickname_trigger"
+		       style="color: #FFFFFF;">
+		       <span style="text-align: center; font-size: 14px;">
+		       	Complete
+		       </span>
+		    </a>
+		    <h1 class="mui-title text-write">Nickname Setting</h1>
+		</header>
+		
+		
+		<div class="mui-content">
+		    <div class="mui-input-row">
+		        <input id='txt_nickname' type="text" class="mui-input-speech mui-input-clear" 
+		        	   placeholder="Set your nickname">
+		    </div>    
+		</div>
+
+		
+		
+		<script src="../js/commons/app.js"></script>
+		<script src="../js/mui.min.js"></script>
+		<script type="text/javascript">
+			mui.init()
+		</script>
+		
+		<script type="application/javascript">
+			mui.plusReady(function(){		
+				getInitNickName();
+				
+				var modifyNickName = document.getElementById('set_user_nickname_trigger');
+				
+				modifyNickName.addEventListener('tap',function(){
+					
+					
+					var id = app.getUserGlobalInfo().id;
+					var editnickname = document.getElementById('txt_nickname').value;
+					if(editnickname == null || editnickname.length == 0){
+						app.showToast("NickName cannot be empty","error");
+						return;
+					}
+					if(editnickname.length > 8 ){
+						app.showToast("NickName is too long","error");
+						return;
+					}
+					
+					plus.nativeUI.showWaiting("Loading");
+					
+					mui.ajax(app.serverUrl + '/user/setnickname',{
+						data:{
+							userId: id,
+							nickname: editnickname
+						},
+						dataType:'json',//Server return Json Type data
+						type:'post',//HTTP Request time 
+						timeout:10000,//Wait Time out 10 second；
+						headers:{'Content-Type':'application/json'},	              
+						success:function(data){	
+							plus.nativeUI.closeWaiting();
+							if (data.status == 200) {
+								// modify the user nickname 
+								var userInfo = data.data;
+								console.log(JSON.stringify(userInfo));
+								app.setUserGlobalInfo(userInfo);
+								
+								// trigger the user-defined refresh event on their webviews 
+								// by refreshing user information
+								var accountWebView = plus.webview.getWebviewById("account.html");
+								mui.fire(accountWebView,"refresh")
+								
+								mui.openWindow("index.html", "index.html");
+							} else {
+								// show error msg on Mobile
+								console.log(data.msg);
+								app.showToast(data.msg, "error");
+							}
+						}
+					});
+				},{ passive: false})
+			});
+			
+			function getInitNickName(){
+				var userInfo =app.getUserGlobalInfo();
+				var mynickname = userInfo.nickname;
+				txt_nickname = document.getElementById('txt_nickname');
+				txt_nickname.value = mynickname;
+			};
+		</script>
+		
+		
+	</body>
+
+</html>

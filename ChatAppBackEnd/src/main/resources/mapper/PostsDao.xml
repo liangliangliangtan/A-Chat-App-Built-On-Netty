@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.mychatappnetty.dao.PostsDao">
+
+    <insert id="insertPost" useGeneratedKeys="false">
+        INSERT INTO
+            tb_posts(id,post_content,user_id,post_create_time)
+		VALUES
+		(#{id},#{postContent},#{userId},
+		#{postCreateTime})
+    </insert>
+
+    <select id="batchQueryPostsByPostId"
+            parameterType="java.util.List"
+            resultType="com.example.mychatappnetty.entity.Posts">
+        /* TODO: This SQL can be optimized */
+        SELECT
+        id, post_content, user_id, post_create_time
+        FROM tb_posts
+        WHERE id in
+        <foreach collection="postIdList" item="postId" open="(" close=")" separator=",">
+            #{postId}
+        </foreach>
+        ORDER BY
+        post_create_time
+        DESC
+    </select>
+
+    <delete id="deletePostById" parameterType="String">
+        DELETE FROM
+            tb_posts
+        WHERE
+            id = #{postId}
+    </delete>
+
+
+</mapper>

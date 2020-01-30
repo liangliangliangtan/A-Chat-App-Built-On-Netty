@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title></title>
+    <script src="js/mui.min.js"></script>
+    <script type="text/javascript" src="js/commons/utils.js" ></script>
+    <link href="css/mui.min.css" rel="stylesheet"/>
+    <!--icon library-->
+    <link rel="stylesheet" href="icofont/icofont.min.css" />
+    <link rel="stylesheet" href="css/font/fontpage.css" />
+    <script type="text/javascript" charset="utf-8">
+      	mui.init();
+      	
+      	mui.plusReady(function(){
+      		plus.navigator.setStatusBarStyle("dark");
+      		plus.navigator.setStatusBarBackground(Colors.white); // deep blue background color
+      	});
+      	
+    </script>
+</head>
+<body>
+	<header class="mui-bar mui-bar-nav bg-deepblue">
+	    <h1 class="mui-title text-write" id="head-title" ><b>My Chat App</b></h1>
+	</header>
+	
+	<nav class="mui-bar mui-bar-tab bg-write touch-action" id="fontpage-nav">
+		
+	    <a class="mui-tab-item mui-active" tabIndex="0">
+	        <span class="mui-icon icon icofont-ui-chat"></span>
+	        <span class="mui-tab-label">Chats</span>
+	    </a>
+	    
+	    <a class="mui-tab-item" tabIndex="1">
+	        <span class="mui-icon icon icofont-ui-contact-list"></span>
+	        <span class="mui-tab-label">Contacts</span>
+	    </a>
+	    
+	    <a class="mui-tab-item" tabIndex="2">
+	        <span class=" mui-icon icon icofont-paper-plane "></span>
+	        <span class="mui-tab-label ">Discovery</span>
+	    </a>
+	    
+	    <a class="mui-tab-item" tabIndex="3">
+	        <span class="mui-icon  icon icofont-ui-user"></span>
+	        <span class="mui-tab-label ">Me</span>
+	    </a>
+	    
+	</nav>
+	
+	<script type="text/javascript" src="js/indexPage/addSubViewPage.js" ></script>
+	
+	<script type="application/javascript">
+		mui.plusReady(function(){
+			// forbidden back to login page;
+			mui.back = function(){
+				return false;
+			}
+			netChangeSwitch()
+			setTimeout("initData()","1000");
+		});
+		
+		
+		function netChangeSwitch(){
+			
+			document.addEventListener("netchange", function(){
+				var currentCondition = plus.networkinfo.getCurrentType();
+				var head_title = document.getElementById("head-title");
+				
+				if ( currentCondition != plus.networkinfo.CONNECTION_UNKNOW 
+					&& currentCondition != plus.networkinfo.CONNECTION_NONE){
+					// network connected
+					head_title.innerHTML = '<b>My Chat App</b>';
+				}else {
+					head_title.innerHTML = '<b>My Chat App(Not Connected)</b>';
+					
+				}
+			});
+			
+		}
+		
+		
+		function initData(){
+			var chatlistWebView = plus.webview.getWebviewById("chatlist.html");
+			var accountWebView = plus.webview.getWebviewById("account.html");
+			mui.fire(chatlistWebView,"refresh");
+			mui.fire(accountWebView,"refresh");
+		}
+		
+	</script>
+</body>
+</html>

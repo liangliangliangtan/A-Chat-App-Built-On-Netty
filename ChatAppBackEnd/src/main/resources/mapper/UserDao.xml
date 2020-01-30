@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mychatappnetty.dao.UserDao">
+    <!--Register -->
+    <insert id="insertUser" parameterType = "com.example.mychatappnetty.entity.Users" useGeneratedKeys="false">
+        INSERT INTO tb_users (id, username, password,user_email,
+        face_image,face_image_big,moment_background_img, nickname,qrcode,
+        client_id,status)
+        VALUES (#{id},#{username}, #{password}, #{userEmail}, #{faceImage},#{faceImageBig},#{momentBackgroundImg},#{nickname},#{qrcode},
+        #{clientId},#{status})
+    </insert>
+
+    <!--activate user and modify user status-->
+    <update id="updateUserStatus" parameterType= "com.example.mychatappnetty.entity.Users">
+        UPDATE tb_users
+        <set>
+            <if test="status != null"> status = #{status},</if>
+            <if test="nickname != null"> nickname = #{nickname}</if>
+            <if test="password != null"> password = #{password},</if>
+            <if test="faceImage != null"> face_image = #{faceImage},</if>
+            <if test="faceImageBig != null"> face_image_big = #{faceImageBig},</if>
+            <if test="momentBackgroundImg != null"> moment_background_img = #{momentBackgroundImg},</if>
+            <if test="qrcode != null"> qrcode = #{qrcode}</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!--login, user should have state equal to 1 -->
+    <select id="queryUser" resultType= "com.example.mychatappnetty.entity.Users">
+        SELECT * FROM tb_users
+        <where>
+            <if test="id != null">
+                AND id = #{id}
+            </if>
+            <if test="username != null">
+                AND username = #{username}
+            </if>
+            <if test="password != null">
+                AND password = #{password}
+            </if>
+            <if test="userEmail != null">
+                AND user_email= #{userEmail}
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+        </where>
+    </select>
+
+</mapper>
